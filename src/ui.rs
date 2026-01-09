@@ -7,67 +7,88 @@ use ratatui::{
 };
 
 use crate::{
-  card::{Card, CardSuit, CardRank},
+  card::{Card, CardRank, CardSuit},
   game::{Game, GameStatus},
   hand::Hand,
 };
 
-pub struct BuildCardOptions {
+pub struct BuildCardOptions<'a> {
   pub hidden: bool,
   pub aligment: VerticalAlignment,
-  pub height: u16,
+  pub dimentions: &'a CardDim,
   pub last: bool,
 }
 
 pub fn build_card(card: &Card, options: BuildCardOptions) -> Paragraph<'static> {
-  let card_style = match options.hidden {
-    true => Style::default().bg(Color::DarkGray),
-    false => Style::default(),
-  };
-
   let top_padding = match options.aligment {
-    // card height - 2 (lines rank & suit) - borders
-    VerticalAlignment::Top => options.height - 2 - 2,
+    VerticalAlignment::Top => {
+      if options.hidden {
+        0
+      } else {
+        // card height - 2 (lines rank & suit) - 1 (borders)
+        options.dimentions.height - 2 - 1
+      }
+    }
     _ => 0,
   };
+
   let card_block = Block::new()
     .borders(
       match options.aligment {
         VerticalAlignment::Top => Borders::BOTTOM | Borders::LEFT,
         VerticalAlignment::Bottom => Borders::TOP | Borders::LEFT,
         VerticalAlignment::Center => Borders::TOP | Borders::BOTTOM | Borders::LEFT,
-      } | if options.last {Borders::RIGHT} else { Borders::NONE }
+      } | if options.last {
+        Borders::RIGHT
+      } else {
+        Borders::NONE
+      },
     )
     .border_type(BorderType::Rounded)
-    .style(card_style)
     .padding(Padding::new(1, 1, top_padding, 0));
-
 
   let mut content = vec![];
 
-  let content_color = match card.suit {
-    CardSuit::Hearts | CardSuit::Diamonds => Color::Red,
-    CardSuit::Spades | CardSuit::Clubs => Color::Black,
-  };
+  match options.hidden {
+    false => {
+      let content_color = match card.suit {
+        CardSuit::Hearts | CardSuit::Diamonds => Color::Red,
+        CardSuit::Spades | CardSuit::Clubs => Color::Black,
+      };
 
-  if !options.hidden {
-    content.push(Line::from(Span::styled(
-      card.rank_str(),
-      Style::default().fg(content_color),
-    )));
-    content.push(Line::from(Span::styled(
-      card.suit_simbol(),
-      Style::default().fg(content_color),
-    )));
+      content.push(Line::from(Span::styled(
+        card.rank_str(),
+        Style::default().fg(content_color),
+      )));
+
+      content.push(Line::from(Span::styled(
+        card.suit_simbol(),
+        Style::default().fg(content_color),
+      )));
+
+      if options.aligment == VerticalAlignment::Top {
+        content.reverse();
+      }
+    }
+    true => {
+      let pattern = "▒░";
+      for index in 0..options.dimentions.height - 1 {
+        content.push(Line::from(Span::styled(
+          match index & 1 == 1 {
+            true => pattern.repeat(usize::from(options.dimentions.width - 2)),
+            false => pattern
+              .chars()
+              .rev()
+              .collect::<String>()
+              .repeat(usize::from(options.dimentions.width - 2)),
+          },
+          Style::default(),
+        )));
+      }
+    }
   }
 
-  if options.aligment == VerticalAlignment::Top {
-    content.reverse();
-  }
-
-  let context_widget = Paragraph::new(content).block(card_block);
-
-  return context_widget;
+  return Paragraph::new(content).block(card_block);
 }
 
 pub struct CardDim {
@@ -89,12 +110,15 @@ pub fn calc_card_dim(frame: &mut Frame) -> CardDim {
   return CardDim {
     width: card_width,
     height: card_height,
-  }
+  };
 }
 
 pub fn render_deck(frame: &mut Frame) {
   let card_dim = calc_card_dim(frame);
-  let card = Card { suit: CardSuit::Spades, rank: CardRank::Ace };
+  let card = Card {
+    suit: CardSuit::Spades,
+    rank: CardRank::Ace,
+  };
 
   frame.render_widget(
     build_card(
@@ -102,7 +126,7 @@ pub fn render_deck(frame: &mut Frame) {
       BuildCardOptions {
         hidden: true,
         aligment: VerticalAlignment::Center,
-        height: card_dim.height,
+        dimentions: &card_dim,
         last: true,
       },
     ),
@@ -117,7 +141,7 @@ pub fn render_deck(frame: &mut Frame) {
 
 pub fn render_hand(frame: &mut Frame, hand: &Hand, aligment: VerticalAlignment) {
   let mut card_dim = calc_card_dim(frame);
-  // Half of card hidden by screen
+  // Half of card is hidden by screen
   card_dim.height /= 2;
 
   let cards = hand.cards.iter().enumerate();
@@ -139,7 +163,7 @@ pub fn render_hand(frame: &mut Frame, hand: &Hand, aligment: VerticalAlignment) 
         BuildCardOptions {
           hidden: is_hidden,
           aligment,
-          height: card_dim.height,
+          dimentions: &card_dim,
           last: (index as u16) == cards_count - 1,
         },
       ),
