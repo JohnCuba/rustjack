@@ -1,7 +1,12 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use crate::balance::Balance;
 use crate::deck::Deck;
 use crate::hand::Hand;
 
 pub enum GameStatus {
+  Betting,
   PlayerTurn,
   DealerTurn,
   PlayerWon,
@@ -14,10 +19,11 @@ pub struct Game {
   pub player_hand: Hand,
   pub dealer_hand: Hand,
   pub status: GameStatus,
+  pub balance: Rc<RefCell<Balance>>,
 }
 
 impl Game {
-  pub fn new() -> Self {
+  pub fn new(balance: Rc<RefCell<Balance>>) -> Self {
     let mut deck = Deck::new();
     deck.shuffle();
 
@@ -25,10 +31,12 @@ impl Game {
       deck,
       player_hand: Hand::new(),
       dealer_hand: Hand::new(),
-      status: GameStatus::PlayerTurn,
+      status: GameStatus::Betting,
+      balance: balance,
     };
 
     game.initial_deal();
+    game.balance.borrow_mut().increase_bet();
     return game;
   }
 
@@ -43,6 +51,15 @@ impl Game {
     }
   }
 
+  pub fn player_increase_bet(&mut self) {
+    match self.status {
+      GameStatus::Betting => {
+        self.balance.borrow_mut().increase_bet();
+      }
+      _ => return,
+    }
+  }
+
   fn dealer_play(&mut self) {
     while self.dealer_hand.score() < 17 {
       if let Some(card) = self.deck.draw() {
@@ -53,23 +70,31 @@ impl Game {
   }
 
   pub fn player_hit(&mut self) {
-    if let GameStatus::PlayerTurn = self.status {
-      if let Some(card) = self.deck.draw() {
-        self.player_hand.push(card);
-      }
+    match self.status {
+      GameStatus::Betting | GameStatus::PlayerTurn => {
+        self.status = GameStatus::PlayerTurn;
+        if let Some(card) = self.deck.draw() {
+          self.player_hand.push(card);
+        }
 
-      if self.player_hand.score() > 21 {
-        self.status = GameStatus::DealerWon;
-        return;
+        if self.player_hand.score() > 21 {
+          self.status = GameStatus::DealerWon;
+          self.balance.borrow_mut().dealer_take_bet();
+          return;
+        }
       }
-
-      self.dealer_play();
+      _ => return,
     }
   }
 
   pub fn player_stand(&mut self) {
-    self.status = GameStatus::DealerTurn;
-    self.dealer_play();
+    match self.status {
+      GameStatus::Betting | GameStatus::PlayerTurn => {
+        self.status = GameStatus::DealerTurn;
+        self.dealer_play();
+      }
+      _ => return,
+    }
   }
 
   fn determine_winner(&mut self) {
@@ -78,10 +103,13 @@ impl Game {
 
     if d_score > 21 || p_score > d_score {
       self.status = GameStatus::PlayerWon;
+      self.balance.borrow_mut().player_take_bet();
     } else if d_score > p_score {
       self.status = GameStatus::DealerWon;
+      self.balance.borrow_mut().dealer_take_bet();
     } else {
       self.status = GameStatus::Draw;
+      self.balance.borrow_mut().divide_bet();
     }
   }
 }

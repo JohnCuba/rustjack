@@ -1,4 +1,6 @@
 use std::io;
+use std::rc::Rc;
+use std::cell::RefCell;
 use std::error::Error;
 use std::time::Duration;
 
@@ -13,13 +15,14 @@ use ratatui::{
   backend::CrosstermBackend,
 };
 
-use crate::game::Game;
-
 mod card;
 mod deck;
-mod game;
 mod hand;
-mod ui;
+mod game;
+mod balance;
+mod view;
+
+use crate::{balance::Balance, game::Game};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -29,18 +32,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
   let backend = CrosstermBackend::new(stdout);
   let mut terminal = Terminal::new(backend)?;
 
-  let mut game = Game::new();
+  let balance = Rc::new(RefCell::new(Balance::new()));
+  let mut game = Game::new(balance.clone());
 
   loop {
-    terminal.draw(|frame| ui::render_game(frame, &game))?;
+    terminal.draw(|frame| view::render_game(frame, &game))?;
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {
         match key.code {
           KeyCode::Char('n') => {
-            game = Game::new();
+            balance.borrow_mut().divide_bet();
+            game = Game::new(balance.clone());
           },
           KeyCode::Char('q') => { break; },
+          KeyCode::Char('b') => {
+            game.player_increase_bet();
+          },
           KeyCode::Char('s') => {
             game.player_stand();
           },
