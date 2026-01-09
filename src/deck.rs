@@ -1,9 +1,9 @@
-use rand::seq::SliceRandom;
 use rand::rng;
+use rand::seq::SliceRandom;
 
 use crate::card::Card;
-use crate::card::CardSuit;
 use crate::card::CardRank;
+use crate::card::CardSuit;
 
 pub struct Deck {
   pub cards: Vec<Card>,
@@ -12,10 +12,26 @@ pub struct Deck {
 impl Deck {
   pub fn new() -> Self {
     let mut cards = Vec::with_capacity(52);
-    let suits = [CardSuit::Hearts, CardSuit::Diamonds, CardSuit::Clubs, CardSuit::Spades];
+    let suits = [
+      CardSuit::Hearts,
+      CardSuit::Diamonds,
+      CardSuit::Clubs,
+      CardSuit::Spades,
+    ];
     let ranks = [
-      CardRank::Two, CardRank::Three, CardRank::Four, CardRank::Five, CardRank::Six, CardRank::Seven,
-      CardRank::Eight, CardRank::Nine, CardRank::Ten, CardRank::Jack, CardRank::Queen, CardRank::King, CardRank::Ace,
+      CardRank::Two,
+      CardRank::Three,
+      CardRank::Four,
+      CardRank::Five,
+      CardRank::Six,
+      CardRank::Seven,
+      CardRank::Eight,
+      CardRank::Nine,
+      CardRank::Ten,
+      CardRank::Jack,
+      CardRank::Queen,
+      CardRank::King,
+      CardRank::Ace,
     ];
 
     for &suit in &suits {
