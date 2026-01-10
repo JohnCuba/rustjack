@@ -70,7 +70,7 @@ pub fn build(card: &Card, options: BuildCardOptions) -> Paragraph<'static> {
     false => {
       let content_color = match card.suit {
         CardSuit::Hearts | CardSuit::Diamonds => Color::Red,
-        CardSuit::Spades | CardSuit::Clubs => Color::Black,
+        CardSuit::Spades | CardSuit::Clubs => Color::White,
       };
 
       content.push(Line::from(Span::styled(
