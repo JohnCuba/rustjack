@@ -1,14 +1,14 @@
-use std::cell::RefCell;
 use std::rc::Rc;
+use std::{cell::RefCell};
 
 use crossterm::event::{KeyCode, KeyEvent};
 
 use ratatui::{
   Frame,
   layout::{HorizontalAlignment, Rect, VerticalAlignment},
-  text::{Line, Span, Text},
-  widgets::{Block, Paragraph},
   style::{Color, Style},
+  text::{Line, Span, Text},
+  widgets::{Block, Paragraph, Wrap},
 };
 
 use crate::balance::Balance;
@@ -19,6 +19,28 @@ mod deck;
 mod hand;
 
 pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
+  if frame.area().width < 50 || frame.area().height < 19 {
+    let content = format!(
+      "Terminal window must be at least 50x19, now {}x{}",
+      frame.area().width,
+      frame.area().height,
+    );
+    let content_len = content.len() as u16;
+    frame.render_widget(
+      Paragraph::new(content)
+        .alignment(HorizontalAlignment::Center)
+        .wrap(Wrap { trim: true })
+        .scroll((0, 0)),
+      Rect {
+        x: 0,
+        y: (frame.area().height / 2) - content_len / frame.area().width,
+        width: frame.area().width,
+        height: frame.area().height,
+      },
+    );
+    return;
+  }
+
   hand::render(
     frame,
     hand::RenderHandOptions {
@@ -76,19 +98,28 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
       content.push(Line::from("Dealer turn"));
     }
     GameStatus::PlayerWon => {
-      content.push(Line::from(Span::styled("You won!", Style::default().fg(Color::Green))));
+      content.push(Line::from(Span::styled(
+        "You won!",
+        Style::default().fg(Color::Green),
+      )));
       content.push(Line::from(""));
       content.push(Line::from("N - new game"));
       content.push(Line::from("R - reset balance"));
     }
     GameStatus::DealerWon => {
-      content.push(Line::from(Span::styled("Dealer won!", Style::default().fg(Color::Red))));
+      content.push(Line::from(Span::styled(
+        "Dealer won!",
+        Style::default().fg(Color::Red),
+      )));
       content.push(Line::from(""));
       content.push(Line::from("N - new game"));
       content.push(Line::from("R - reset balance"));
     }
     GameStatus::Draw => {
-      content.push(Line::from(Span::styled("Draw!", Style::default().fg(Color::Yellow))));
+      content.push(Line::from(Span::styled(
+        "Draw!",
+        Style::default().fg(Color::Yellow),
+      )));
       content.push(Line::from(""));
       content.push(Line::from("N - new game"));
       content.push(Line::from("R - reset balance"));
@@ -108,8 +139,7 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
   );
 
   frame.render_widget(
-    Block::bordered()
-      .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left)),
+    Block::bordered().title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left)),
     frame.area(),
   );
 }
