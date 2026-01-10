@@ -58,7 +58,7 @@ impl Balance {
     }
 
     self.player = std::cmp::max(self.player - 5, 0);
-    self.bet += 5;
+    self.bet += 10;
   }
 
   pub fn player_take_bet(&mut self) {
