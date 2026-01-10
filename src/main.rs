@@ -5,7 +5,7 @@ use std::error::Error;
 use std::time::Duration;
 
 use crossterm::{
-  event::{self, Event, KeyCode},
+  event::{self, Event},
   execute,
   terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
@@ -14,6 +14,8 @@ use ratatui::{
   Terminal,
   backend::CrosstermBackend,
 };
+
+mod storage;
 
 mod card;
 mod deck;
@@ -32,30 +34,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
   let backend = CrosstermBackend::new(stdout);
   let mut terminal = Terminal::new(backend)?;
 
-  let balance = Rc::new(RefCell::new(Balance::new()));
-  let mut game = Game::new(balance.clone());
+  let db = sled::open("rust_jack_db")?;
+  let balance = Rc::new(RefCell::new(Balance::new(db)));
+  let game = Rc::new(RefCell::new(Game::new(balance.clone())));
 
   loop {
-    terminal.draw(|frame| view::render_game(frame, &game))?;
+    terminal.draw(|frame| view::render_game(frame, game.clone()))?;
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {
-        match key.code {
-          KeyCode::Char('n') => {
-            balance.borrow_mut().divide_bet();
-            game = Game::new(balance.clone());
-          },
-          KeyCode::Char('q') => { break; },
-          KeyCode::Char('b') => {
-            game.player_increase_bet();
-          },
-          KeyCode::Char('s') => {
-            game.player_stand();
-          },
-          KeyCode::Char('h') => {
-            game.player_hit();
-          },
-          _ => continue,
+        let res = view::handle_key_event(key, game.clone(), balance.clone());
+
+        match res {
+          Ok(()) => continue,
+          Err(()) => break,
         }
       }
     }
