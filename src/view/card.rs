@@ -17,9 +17,8 @@ pub fn calc_dim(frame: &mut Frame) -> CardDim {
   // 1.4 Real card aspect ratio / 2.0 terminal character aspect ratio
   let terminal_card_aspect_ratio: f32 = 0.7;
 
-  // 15% screen width
-  let mut card_width = (frame.area().width as f32 * 0.15) as u16;
-  card_width = card_width.max(10);
+  // 25% screen width
+  let card_width = ((frame.area().width as f32 * 0.25) as u16).min(24).max(8);
 
   let mut card_height = (card_width as f32 * terminal_card_aspect_ratio) as u16;
   card_height = card_height.max(5);

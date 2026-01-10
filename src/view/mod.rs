@@ -1,15 +1,14 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crossterm::{
-  event::{KeyCode, KeyEvent},
-};
+use crossterm::event::{KeyCode, KeyEvent};
 
 use ratatui::{
   Frame,
   layout::{HorizontalAlignment, Rect, VerticalAlignment},
-  text::{Line, Text},
-  widgets::Block,
+  text::{Line, Span, Text},
+  widgets::{Block, Paragraph},
+  style::{Color, Style},
 };
 
 use crate::balance::Balance;
@@ -25,7 +24,6 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
     hand::RenderHandOptions {
       hand: &game.borrow().dealer_hand,
       aligment: VerticalAlignment::Top,
-      balance: None,
       show_only_first: match game.borrow().status {
         GameStatus::Draw | GameStatus::PlayerWon | GameStatus::DealerWon => false,
         _ => true,
@@ -38,33 +36,9 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
       hand: &game.borrow().player_hand,
       aligment: VerticalAlignment::Bottom,
       show_only_first: false,
-      balance: Some(game.borrow().balance.borrow().player),
-    }
+    },
   );
   deck::render(frame);
-
-  let mut content = String::new();
-
-  match game.borrow().status {
-    GameStatus::Betting => {
-      content.push_str(" Betting. B - increase bet on 5$, H - hit, S - stand ");
-    }
-    GameStatus::PlayerTurn => {
-      content.push_str(" Your turn. H - hit, S - stand ");
-    }
-    GameStatus::PlayerWon => {
-      content.push_str(" You won! N - new game ");
-    }
-    GameStatus::DealerWon => {
-      content.push_str(" Dealer won! N - new game ");
-    }
-    GameStatus::Draw => {
-      content.push_str(" Draw! N - new game ");
-    }
-    GameStatus::DealerTurn => {
-      content.push_str(" Dealer turn ");
-    }
-  }
 
   let bet_text = format!("bet: {}$", game.borrow().balance.borrow().bet);
   let bet_text_len = bet_text.len() as u16;
@@ -79,25 +53,79 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
     },
   );
 
+  let mut content = vec![
+    Line::from(format!("{} $", game.borrow().balance.borrow().player)),
+    Line::from(""),
+  ];
+
+  match game.borrow().status {
+    GameStatus::Betting => {
+      content.push(Line::from("Betting"));
+      content.push(Line::from(""));
+      content.push(Line::from("B - increase bet on 5$"));
+      content.push(Line::from("H - hit"));
+      content.push(Line::from("S - stand"));
+    }
+    GameStatus::PlayerTurn => {
+      content.push(Line::from("Your turn"));
+      content.push(Line::from(""));
+      content.push(Line::from("H - hit"));
+      content.push(Line::from("S - stand"));
+    }
+    GameStatus::DealerTurn => {
+      content.push(Line::from("Dealer turn"));
+    }
+    GameStatus::PlayerWon => {
+      content.push(Line::from(Span::styled("You won!", Style::default().fg(Color::Green))));
+      content.push(Line::from(""));
+      content.push(Line::from("N - new game"));
+      content.push(Line::from("R - reset balance"));
+    }
+    GameStatus::DealerWon => {
+      content.push(Line::from(Span::styled("Dealer won!", Style::default().fg(Color::Red))));
+      content.push(Line::from(""));
+      content.push(Line::from("N - new game"));
+      content.push(Line::from("R - reset balance"));
+    }
+    GameStatus::Draw => {
+      content.push(Line::from(Span::styled("Draw!", Style::default().fg(Color::Yellow))));
+      content.push(Line::from(""));
+      content.push(Line::from("N - new game"));
+      content.push(Line::from("R - reset balance"));
+    }
+  }
+
+  let content_len = content.len() as u16;
+
+  frame.render_widget(
+    Text::from(content),
+    Rect {
+      x: 2,
+      y: (frame.area().height / 2) - (content_len / 2).max(1),
+      width: 50,
+      height: content_len,
+    },
+  );
+
   frame.render_widget(
     Block::bordered()
-      .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left))
-      .title_bottom(Line::from(" R - reset balance ").alignment(HorizontalAlignment::Left))
-      .title_bottom(Line::from(content).alignment(HorizontalAlignment::Right)),
+      .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left)),
     frame.area(),
   );
 }
 
-pub fn handle_key_event(key: KeyEvent, game: Rc<RefCell<Game>>, balance: Rc<RefCell<Balance>>) -> Result<(), ()> {
+pub fn handle_key_event(
+  key: KeyEvent,
+  game: Rc<RefCell<Game>>,
+  balance: Rc<RefCell<Balance>>,
+) -> Result<(), ()> {
   match key.code {
     KeyCode::Char('n') => {
       balance.borrow_mut().divide_bet();
       game.replace(Game::new(balance.clone()));
       Ok(())
     }
-    KeyCode::Char('q') => {
-      Err(())
-    }
+    KeyCode::Char('q') => Err(()),
     KeyCode::Char('r') => {
       balance.borrow_mut().reset();
       game.replace(Game::new(balance.clone()));
