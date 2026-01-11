@@ -55,7 +55,7 @@ jobs:
           formula-name: rustjack
           homebrew-tap: johncuba/homebrew-tap
           base-branch: main
-          download-url: https://github.com/johncuba/rustjack/releases/download/${{ github.ref_name }}/rustjack-${{ matrix.target }}.tar.gz
+          download-url: https://github.com/johncuba/rustjack/releases/download/${{ github.ref_name }}/rustjack-x86_64-apple-darwin.tar.gz
           download-sha256: ${{ needs.build.outputs.hash }}
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
