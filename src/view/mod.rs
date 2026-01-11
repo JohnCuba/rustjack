@@ -37,25 +37,30 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
     return;
   }
 
-  hand::render(
-    frame,
-    hand::RenderHandOptions {
-      hand: &game.dealer_hand,
-      aligment: VerticalAlignment::Top,
-      show_only_first: match game.status {
-        GameStatus::Draw | GameStatus::PlayerWon | GameStatus::DealerWon => false,
-        _ => true,
-      },
-    },
-  );
-  hand::render(
-    frame,
-    hand::RenderHandOptions {
-      hand: &game.player_hand,
-      aligment: VerticalAlignment::Bottom,
-      show_only_first: false,
-    },
-  );
+  match &game.status {
+    GameStatus::Betting => {}
+    _ => {
+      hand::render(
+        frame,
+        hand::RenderHandOptions {
+          hand: &game.dealer_hand,
+          aligment: VerticalAlignment::Top,
+          show_only_first: match game.status {
+            GameStatus::Draw | GameStatus::PlayerWon | GameStatus::DealerWon => false,
+            _ => true,
+          },
+        },
+      );
+      hand::render(
+        frame,
+        hand::RenderHandOptions {
+          hand: &game.player_hand,
+          aligment: VerticalAlignment::Bottom,
+          show_only_first: false,
+        },
+      );
+    }
+  }
   deck::render(frame);
 
   let bet_text = format!("bet: {}$", game.balance.bet);
@@ -81,8 +86,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
       content.push(Line::from("Betting"));
       content.push(Line::from(""));
       content.push(Line::from("B - increase bet on 5$"));
-      content.push(Line::from("H - hit"));
-      content.push(Line::from("S - stand"));
+      content.push(Line::from("S - start game"));
     }
     GameStatus::PlayerTurn => {
       content.push(Line::from("Your turn"));
@@ -151,15 +155,25 @@ pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
       Ok(())
     }
     KeyCode::Char('b') => {
-      game.player_increase_bet();
+      match &game.status {
+        GameStatus::Betting => game.player_increase_bet(),
+        _ => {},
+      };
       Ok(())
     }
     KeyCode::Char('s') => {
-      game.player_stand();
+      match &game.status {
+        GameStatus::Betting => game.start(),
+        GameStatus::PlayerTurn => game.player_stand(),
+        _ => {},
+      };
       Ok(())
     }
     KeyCode::Char('h') => {
-      game.player_hit();
+      match &game.status {
+        GameStatus::PlayerTurn => game.player_hit(),
+        _ => {},
+      }
       Ok(())
     }
     _ => Ok(()),

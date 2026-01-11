@@ -21,7 +21,7 @@ pub struct Game {
 
 impl Game {
   pub fn new() -> Self {
-    let mut game = Self {
+    let mut game =  Self {
       deck: Deck::new(),
       player_hand: Hand::new(),
       dealer_hand: Hand::new(),
@@ -29,14 +29,13 @@ impl Game {
       balance: Balance::new(),
     };
 
-    game.init();
+    game.balance.increase_bet();
 
     return game;
   }
 
-  fn init(&mut self) {
+  pub fn start(&mut self) {
     self.deck.shuffle();
-    self.balance.increase_bet();
 
     for _ in 0..2 {
       if let Some(card) = self.deck.draw() {
@@ -46,16 +45,18 @@ impl Game {
         self.dealer_hand.push(card);
       }
     }
+
+    self.status = GameStatus::PlayerTurn;
   }
 
   pub fn reset(&mut self) {
-    self.balance.dealer_take_bet();
+    self.balance.divide_bet();
     self.deck = Deck::new();
     self.player_hand = Hand::new();
     self.dealer_hand = Hand::new();
     self.status = GameStatus::Betting;
 
-    self.init();
+    self.balance.increase_bet();
   }
 
   pub fn reset_balance(&mut self) {
@@ -64,12 +65,7 @@ impl Game {
   }
 
   pub fn player_increase_bet(&mut self) {
-    match self.status {
-      GameStatus::Betting => {
-        self.balance.increase_bet();
-      }
-      _ => return,
-    }
+    self.balance.increase_bet();
   }
 
   fn dealer_play(&mut self) {
@@ -82,31 +78,21 @@ impl Game {
   }
 
   pub fn player_hit(&mut self) {
-    match self.status {
-      GameStatus::Betting | GameStatus::PlayerTurn => {
-        self.status = GameStatus::PlayerTurn;
-        if let Some(card) = self.deck.draw() {
-          self.player_hand.push(card);
-        }
+    self.status = GameStatus::PlayerTurn;
+    if let Some(card) = self.deck.draw() {
+      self.player_hand.push(card);
+    }
 
-        if self.player_hand.score() > 21 {
-          self.status = GameStatus::DealerWon;
-          self.balance.dealer_take_bet();
-          return;
-        }
-      }
-      _ => return,
+    if self.player_hand.score() > 21 {
+      self.status = GameStatus::DealerWon;
+      self.balance.dealer_take_bet();
+      return;
     }
   }
 
   pub fn player_stand(&mut self) {
-    match self.status {
-      GameStatus::Betting | GameStatus::PlayerTurn => {
-        self.status = GameStatus::DealerTurn;
-        self.dealer_play();
-      }
-      _ => return,
-    }
+    self.status = GameStatus::DealerTurn;
+    self.dealer_play();
   }
 
   fn determine_winner(&mut self) {
