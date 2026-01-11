@@ -1,6 +1,3 @@
-use std::rc::Rc;
-use std::{cell::RefCell};
-
 use crossterm::event::{KeyCode, KeyEvent};
 
 use ratatui::{
@@ -11,14 +8,13 @@ use ratatui::{
   widgets::{Block, Paragraph, Wrap},
 };
 
-use crate::balance::Balance;
 use crate::game::{Game, GameStatus};
 
 mod card;
 mod deck;
 mod hand;
 
-pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
+pub fn render_game(frame: &mut Frame, game: &Game) {
   if frame.area().width < 50 || frame.area().height < 19 {
     let content = format!(
       "Terminal window must be at least 50x19, now {}x{}",
@@ -44,9 +40,9 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
   hand::render(
     frame,
     hand::RenderHandOptions {
-      hand: &game.borrow().dealer_hand,
+      hand: &game.dealer_hand,
       aligment: VerticalAlignment::Top,
-      show_only_first: match game.borrow().status {
+      show_only_first: match game.status {
         GameStatus::Draw | GameStatus::PlayerWon | GameStatus::DealerWon => false,
         _ => true,
       },
@@ -55,18 +51,18 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
   hand::render(
     frame,
     hand::RenderHandOptions {
-      hand: &game.borrow().player_hand,
+      hand: &game.player_hand,
       aligment: VerticalAlignment::Bottom,
       show_only_first: false,
     },
   );
   deck::render(frame);
 
-  let bet_text = format!("bet: {}$", game.borrow().balance.borrow().bet);
+  let bet_text = format!("bet: {}$", game.balance.bet);
   let bet_text_len = bet_text.len() as u16;
 
   frame.render_widget(
-    Text::from(format!("bet: {}$", game.borrow().balance.borrow().bet)),
+    Text::from(format!("bet: {}$", game.balance.bet)),
     Rect {
       x: frame.area().width / 2 - bet_text_len / 2,
       y: frame.area().height / 2,
@@ -76,11 +72,11 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
   );
 
   let mut content = vec![
-    Line::from(format!("{} $", game.borrow().balance.borrow().player)),
+    Line::from(format!("{} $", game.balance.player)),
     Line::from(""),
   ];
 
-  match game.borrow().status {
+  match game.status {
     GameStatus::Betting => {
       content.push(Line::from("Betting"));
       content.push(Line::from(""));
@@ -144,33 +140,30 @@ pub fn render_game(frame: &mut Frame, game: Rc<RefCell<Game>>) {
   );
 }
 
-pub fn handle_key_event(
+pub fn handle_key_event<'a>(
   key: KeyEvent,
-  game: Rc<RefCell<Game>>,
-  balance: Rc<RefCell<Balance>>,
+  game: &mut Game,
 ) -> Result<(), ()> {
   match key.code {
     KeyCode::Char('n') => {
-      balance.borrow_mut().divide_bet();
-      game.replace(Game::new(balance.clone()));
+      game.reset(false);
       Ok(())
     }
     KeyCode::Char('q') => Err(()),
     KeyCode::Char('r') => {
-      balance.borrow_mut().reset();
-      game.replace(Game::new(balance.clone()));
+      game.reset(true);
       Ok(())
     }
     KeyCode::Char('b') => {
-      game.borrow_mut().player_increase_bet();
+      game.player_increase_bet();
       Ok(())
     }
     KeyCode::Char('s') => {
-      game.borrow_mut().player_stand();
+      game.player_stand();
       Ok(())
     }
     KeyCode::Char('h') => {
-      game.borrow_mut().player_hit();
+      game.player_hit();
       Ok(())
     }
     _ => Ok(()),

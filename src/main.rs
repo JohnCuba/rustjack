@@ -1,6 +1,4 @@
 use std::io;
-use std::rc::Rc;
-use std::cell::RefCell;
 use std::error::Error;
 use std::time::Duration;
 
@@ -24,7 +22,7 @@ mod game;
 mod balance;
 mod view;
 
-use crate::{balance::Balance, game::Game};
+use crate::{game::Game};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -34,16 +32,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
   let backend = CrosstermBackend::new(stdout);
   let mut terminal = Terminal::new(backend)?;
 
-  let db = sled::open("rust_jack_db")?;
-  let balance = Rc::new(RefCell::new(Balance::new(db)));
-  let game = Rc::new(RefCell::new(Game::new(balance.clone())));
+  let mut game = Game::new();
 
   loop {
-    terminal.draw(|frame| view::render_game(frame, game.clone()))?;
+    terminal.draw(|frame| view::render_game(frame, &game))?;
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {
-        let res = view::handle_key_event(key, game.clone(), balance.clone());
+        let res = view::handle_key_event(key, &mut game);
 
         match res {
           Ok(()) => continue,

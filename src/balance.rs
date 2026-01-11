@@ -1,36 +1,20 @@
-use sled::Db;
-
-use crate::storage;
+use crate::storage::{Storage};
 
 pub struct Balance {
   pub player: u32,
   pub bet: u32,
-  db: Db,
+  storage: Storage,
 }
 
 impl Balance {
-  pub fn new(db: Db) -> Self {
-    let mut player_balance = 100;
+  pub fn new() -> Self {
+    let storage = Storage::new();
 
-    let res = (|| -> Result<(), Box<dyn std::error::Error>> {
-      match storage::get_u32_value(&db, "player_balance")? {
-        Some(val) => player_balance = val,
-        None => {}
-      }
-      Ok(())
-    })();
-
-    if let Err(e) = res {
-      eprintln!("Error: {}", e);
-    }
-
-    let balance = Self {
-      player: player_balance,
+    return Self {
+      player: storage.get_u32("player_balance", 100),
       bet: 0,
-      db,
+      storage,
     };
-
-    return balance;
   }
 
   pub fn reset(&mut self) {
@@ -40,16 +24,7 @@ impl Balance {
   }
 
   fn save(&mut self) {
-    let res = (|| -> Result<(), Box<dyn std::error::Error>> {
-      self
-        .db
-        .insert("player_balance", &self.player.to_be_bytes())?;
-      Ok(())
-    })();
-
-    if let Err(e) = res {
-      eprintln!("Error: {}", e);
-    }
+    self.storage.set_u32("player_balance", &self.player);
   }
 
   pub fn increase_bet(&mut self) {

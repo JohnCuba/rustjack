@@ -1,6 +1,3 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use crate::balance::Balance;
 use crate::deck::Deck;
 use crate::hand::Hand;
@@ -19,25 +16,41 @@ pub struct Game {
   pub player_hand: Hand,
   pub dealer_hand: Hand,
   pub status: GameStatus,
-  pub balance: Rc<RefCell<Balance>>,
+  pub balance: Balance,
 }
 
 impl Game {
-  pub fn new(balance: Rc<RefCell<Balance>>) -> Self {
-    let mut deck = Deck::new();
-    deck.shuffle();
-
+  pub fn new() -> Self {
     let mut game = Self {
-      deck,
+      deck: Deck::new(),
       player_hand: Hand::new(),
       dealer_hand: Hand::new(),
       status: GameStatus::Betting,
-      balance: balance,
+      balance: Balance::new(),
     };
 
-    game.initial_deal();
-    game.balance.borrow_mut().increase_bet();
+    game.init();
+
     return game;
+  }
+
+  fn init(&mut self) {
+    self.deck.shuffle();
+    self.balance.increase_bet();
+    self.initial_deal();
+  }
+
+  pub fn reset(&mut self, with_balance: bool) {
+    if with_balance {
+      self.balance.reset();
+    }
+
+    self.deck = Deck::new();
+    self.player_hand = Hand::new();
+    self.dealer_hand = Hand::new();
+    self.status = GameStatus::Betting;
+
+    self.init();
   }
 
   fn initial_deal(&mut self) {
@@ -54,7 +67,7 @@ impl Game {
   pub fn player_increase_bet(&mut self) {
     match self.status {
       GameStatus::Betting => {
-        self.balance.borrow_mut().increase_bet();
+        self.balance.increase_bet();
       }
       _ => return,
     }
@@ -79,7 +92,7 @@ impl Game {
 
         if self.player_hand.score() > 21 {
           self.status = GameStatus::DealerWon;
-          self.balance.borrow_mut().dealer_take_bet();
+          self.balance.dealer_take_bet();
           return;
         }
       }
@@ -103,13 +116,13 @@ impl Game {
 
     if d_score > 21 || p_score > d_score {
       self.status = GameStatus::PlayerWon;
-      self.balance.borrow_mut().player_take_bet();
+      self.balance.player_take_bet();
     } else if d_score > p_score {
       self.status = GameStatus::DealerWon;
-      self.balance.borrow_mut().dealer_take_bet();
+      self.balance.dealer_take_bet();
     } else {
       self.status = GameStatus::Draw;
-      self.balance.borrow_mut().divide_bet();
+      self.balance.divide_bet();
     }
   }
 }
