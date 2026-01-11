@@ -38,7 +38,7 @@ jobs:
       - name: Calculate Hash
         id: calc_hash
         run: |
-          echo "hash=$(shasum -a 256 my-tool-macos.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "hash=$(shasum -a 256 rustjack-${{ matrix.target }}.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
 
       - name: Upload Artifacts
         uses: softprops/action-gh-release@v1
