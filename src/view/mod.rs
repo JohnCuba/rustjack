@@ -100,7 +100,6 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
       )));
       content.push(Line::from(""));
       content.push(Line::from("N - new game"));
-      content.push(Line::from("R - reset balance"));
     }
     GameStatus::DealerWon => {
       content.push(Line::from(Span::styled(
@@ -109,7 +108,6 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
       )));
       content.push(Line::from(""));
       content.push(Line::from("N - new game"));
-      content.push(Line::from("R - reset balance"));
     }
     GameStatus::Draw => {
       content.push(Line::from(Span::styled(
@@ -118,7 +116,6 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
       )));
       content.push(Line::from(""));
       content.push(Line::from("N - new game"));
-      content.push(Line::from("R - reset balance"));
     }
   }
 
@@ -135,23 +132,22 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
   );
 
   frame.render_widget(
-    Block::bordered().title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left)),
+    Block::bordered()
+      .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left))
+      .title_bottom(Line::from("Q - exit, R - reset balance").alignment(HorizontalAlignment::Left)),
     frame.area(),
   );
 }
 
-pub fn handle_key_event<'a>(
-  key: KeyEvent,
-  game: &mut Game,
-) -> Result<(), ()> {
+pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
   match key.code {
     KeyCode::Char('n') => {
-      game.reset(false);
+      game.reset();
       Ok(())
     }
     KeyCode::Char('q') => Err(()),
     KeyCode::Char('r') => {
-      game.reset(true);
+      game.reset_balance();
       Ok(())
     }
     KeyCode::Char('b') => {

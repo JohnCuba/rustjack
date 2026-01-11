@@ -37,23 +37,7 @@ impl Game {
   fn init(&mut self) {
     self.deck.shuffle();
     self.balance.increase_bet();
-    self.initial_deal();
-  }
 
-  pub fn reset(&mut self, with_balance: bool) {
-    if with_balance {
-      self.balance.reset();
-    }
-
-    self.deck = Deck::new();
-    self.player_hand = Hand::new();
-    self.dealer_hand = Hand::new();
-    self.status = GameStatus::Betting;
-
-    self.init();
-  }
-
-  fn initial_deal(&mut self) {
     for _ in 0..2 {
       if let Some(card) = self.deck.draw() {
         self.player_hand.push(card);
@@ -62,6 +46,21 @@ impl Game {
         self.dealer_hand.push(card);
       }
     }
+  }
+
+  pub fn reset(&mut self) {
+    self.balance.dealer_take_bet();
+    self.deck = Deck::new();
+    self.player_hand = Hand::new();
+    self.dealer_hand = Hand::new();
+    self.status = GameStatus::Betting;
+
+    self.init();
+  }
+
+  pub fn reset_balance(&mut self) {
+    self.balance.reset();
+    self.reset();
   }
 
   pub fn player_increase_bet(&mut self) {
