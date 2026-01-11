@@ -38,7 +38,7 @@ jobs:
         with:
           files: rustjack-*.tar.gz
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
 
   update-tap:
     needs: build
