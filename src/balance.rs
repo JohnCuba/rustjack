@@ -15,7 +15,7 @@ impl Balance {
     let res = (|| -> Result<(), Box<dyn std::error::Error>> {
       match storage::get_u32_value(&db, "player_balance")? {
         Some(val) => player_balance = val,
-        None => {},
+        None => {}
       }
       Ok(())
     })();
