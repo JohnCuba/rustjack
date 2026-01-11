@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    outputs:
+      hash: ${{ steps.calc_hash.outputs.hash }}
     strategy:
       matrix:
         include:
@@ -33,6 +35,11 @@ jobs:
           tar -czf ../../../rustjack-${{ matrix.target }}.tar.gz rustjack
           cd ../../../
 
+      - name: Calculate Hash
+        id: calc_hash
+        run: |
+          echo "hash=$(shasum -a 256 my-tool-macos.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
+
       - name: Upload Artifacts
         uses: softprops/action-gh-release@v1
         with:
@@ -47,10 +54,10 @@ jobs:
       - name: Update Homebrew Tap
         uses: mislav/bump-homebrew-formula-action@v3
         with:
-          # Ссылка на формулу в вашем репозитории tap
           formula-name: rustjack
           homebrew-tap: johncuba/homebrew-tap
           base-branch: main
           download-url: https://github.com/johncuba/rustjack/releases/download/${{ github.ref_name }}/rustjack-x86_64-apple-darwin.tar.gz
+          download-sha256: ${{ needs.build.outputs.hash }}
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
