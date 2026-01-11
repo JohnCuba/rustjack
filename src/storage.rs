@@ -1,4 +1,5 @@
 use sled::Db;
+use std::{env::home_dir, path::PathBuf};
 
 pub struct Storage {
   db: Option<Db>
@@ -6,8 +7,10 @@ pub struct Storage {
 
 impl Storage {
   pub fn new() -> Self {
+    let binding = home_dir().unwrap_or(PathBuf::new());
+    let root_path = binding.to_str().unwrap_or(".");
     return Self {
-      db: sled::open("rust_jack_db").ok(),
+      db: sled::open(format!("{}/.config/rustjack/db", root_path)).ok(),
     }
   }
 
