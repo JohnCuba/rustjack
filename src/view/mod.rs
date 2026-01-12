@@ -12,6 +12,7 @@ use crate::game::{Game, GameStatus};
 
 mod constants;
 mod fallback;
+mod bet;
 mod card;
 mod deck;
 mod hand;
@@ -48,6 +49,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
   }
 
   deck::render(frame, &game);
+  bet::render(frame, game);
 
   let mut content = vec![
     Line::from(format!("{} $", game.balance.player)),
