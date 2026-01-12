@@ -6,14 +6,12 @@ use ratatui::{
   widgets::{Block, BorderType, Borders, Padding, Paragraph},
 };
 
-use crate::card::{Card, CardSuit};
+use crate::{
+  card::{Card, CardSuit},
+  view::constants::Dimension,
+};
 
-pub struct CardDim {
-  pub width: u16,
-  pub height: u16,
-}
-
-pub fn calc_dim(frame: &mut Frame) -> CardDim {
+pub fn calc_dim(frame: &mut Frame) -> Dimension {
   // 1.4 Real card aspect ratio / 2.0 terminal character aspect ratio
   let terminal_card_aspect_ratio: f32 = 0.7;
 
@@ -23,7 +21,7 @@ pub fn calc_dim(frame: &mut Frame) -> CardDim {
   let mut card_height = (card_width as f32 * terminal_card_aspect_ratio) as u16;
   card_height = card_height.max(5);
 
-  return CardDim {
+  return Dimension {
     width: card_width,
     height: card_height,
   };
@@ -32,7 +30,7 @@ pub fn calc_dim(frame: &mut Frame) -> CardDim {
 pub struct BuildCardOptions<'a> {
   pub hidden: bool,
   pub aligment: VerticalAlignment,
-  pub dimentions: &'a CardDim,
+  pub dimension: &'a Dimension,
   pub last: bool,
 }
 
@@ -43,7 +41,7 @@ pub fn build(card: &Card, options: BuildCardOptions) -> Paragraph<'static> {
         0
       } else {
         // card height - 2 (lines rank & suit) - 1 (borders)
-        options.dimentions.height - 2 - 1
+        options.dimension.height - 2 - 1
       }
     }
     _ => 0,
@@ -89,15 +87,15 @@ pub fn build(card: &Card, options: BuildCardOptions) -> Paragraph<'static> {
     }
     true => {
       let pattern = "▒░";
-      for index in 0..options.dimentions.height - 1 {
+      for index in 0..options.dimension.height - 1 {
         content.push(Line::from(Span::styled(
           match index & 1 == 1 {
-            true => pattern.repeat(usize::from(options.dimentions.width - 2)),
+            true => pattern.repeat(usize::from(options.dimension.width - 2)),
             false => pattern
               .chars()
               .rev()
               .collect::<String>()
-              .repeat(usize::from(options.dimentions.width - 2)),
+              .repeat(usize::from(options.dimension.width - 2)),
           },
           Style::default(),
         )));

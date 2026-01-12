@@ -19,7 +19,7 @@ pub fn render(frame: &mut Frame) {
       card::BuildCardOptions {
         hidden: true,
         aligment: VerticalAlignment::Center,
-        dimentions: &card_dim,
+        dimension: &card_dim,
         last: true,
       },
     ),

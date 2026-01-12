@@ -10,30 +10,15 @@ use ratatui::{
 
 use crate::game::{Game, GameStatus};
 
+mod constants;
+mod fallback;
 mod card;
 mod deck;
 mod hand;
 
 pub fn render_game(frame: &mut Frame, game: &Game) {
-  if frame.area().width < 50 || frame.area().height < 19 {
-    let content = format!(
-      "Terminal window must be at least 50x19, now {}x{}",
-      frame.area().width,
-      frame.area().height,
-    );
-    let content_len = content.len() as u16;
-    frame.render_widget(
-      Paragraph::new(content)
-        .alignment(HorizontalAlignment::Center)
-        .wrap(Wrap { trim: true })
-        .scroll((0, 0)),
-      Rect {
-        x: 0,
-        y: (frame.area().height / 2) - content_len / frame.area().width,
-        width: frame.area().width,
-        height: frame.area().height,
-      },
-    );
+  if fallback::check_view_port(frame) {
+    fallback::render_fallback(frame);
     return;
   }
 

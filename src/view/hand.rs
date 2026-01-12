@@ -40,7 +40,7 @@ pub fn render(frame: &mut Frame, options: RenderHandOptions) {
         card::BuildCardOptions {
           hidden: is_hidden,
           aligment: options.aligment,
-          dimentions: &card_dim,
+          dimension: &card_dim,
           last: (index as u16) == cards_count - 1,
         },
       ),
