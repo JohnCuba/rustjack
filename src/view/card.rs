@@ -73,12 +73,12 @@ pub fn build(card: &Card, options: BuildCardOptions) -> Paragraph<'static> {
 
       content.push(Line::from(Span::styled(
         card.rank_str(),
-        Style::default().fg(content_color),
+        Style::default().fg(content_color).bold(),
       )));
 
       content.push(Line::from(Span::styled(
         card.suit_simbol(),
-        Style::default().fg(content_color),
+        Style::default().fg(content_color).bold(),
       )));
 
       if options.aligment == VerticalAlignment::Top {

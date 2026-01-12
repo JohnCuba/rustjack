@@ -2,9 +2,8 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use ratatui::{
   Frame,
-  layout::{HorizontalAlignment, Rect, VerticalAlignment},
-  style::{Color, Style},
-  text::{Line, Span, Text},
+  layout::{HorizontalAlignment, VerticalAlignment},
+  text::{Line},
   widgets::Block,
 };
 
@@ -16,6 +15,7 @@ mod bet;
 mod card;
 mod deck;
 mod hand;
+mod status;
 
 pub fn render_game(frame: &mut Frame, game: &Game) {
   if fallback::check_view_port(frame) {
@@ -49,65 +49,8 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
   }
 
   deck::render(frame, &game);
-  bet::render(frame, game);
-
-  let mut content = vec![
-    Line::from(format!("{} $", game.balance.player)),
-    Line::from(""),
-  ];
-
-  match game.status {
-    GameStatus::Betting => {
-      content.push(Line::from("Betting"));
-      content.push(Line::from(""));
-      content.push(Line::from("[s] start game"));
-    }
-    GameStatus::PlayerTurn => {
-      content.push(Line::from("Your turn"));
-      content.push(Line::from(""));
-      content.push(Line::from("[h] hit"));
-      content.push(Line::from("[s] stand"));
-    }
-    GameStatus::DealerTurn => {
-      content.push(Line::from("Dealer turn"));
-    }
-    GameStatus::PlayerWon => {
-      content.push(Line::from(Span::styled(
-        "You won!",
-        Style::default().fg(Color::Green),
-      )));
-      content.push(Line::from(""));
-      content.push(Line::from("[n] new game"));
-    }
-    GameStatus::DealerWon => {
-      content.push(Line::from(Span::styled(
-        "Dealer won!",
-        Style::default().fg(Color::Red),
-      )));
-      content.push(Line::from(""));
-      content.push(Line::from("[n] new game"));
-    }
-    GameStatus::Draw => {
-      content.push(Line::from(Span::styled(
-        "Draw!",
-        Style::default().fg(Color::Yellow),
-      )));
-      content.push(Line::from(""));
-      content.push(Line::from("[n] new game"));
-    }
-  }
-
-  let content_len = content.len() as u16;
-
-  frame.render_widget(
-    Text::from(content),
-    Rect {
-      x: 2,
-      y: (frame.area().height / 2) - (content_len / 2).max(1),
-      width: 50,
-      height: content_len,
-    },
-  );
+  bet::render(frame, &game);
+  status::render(frame, &game);
 
   frame.render_widget(
     Block::bordered()
