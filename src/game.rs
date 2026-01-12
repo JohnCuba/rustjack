@@ -17,6 +17,7 @@ pub struct Game {
   pub dealer_hand: Hand,
   pub status: GameStatus,
   pub balance: Balance,
+  max_decks: u16,
 }
 
 impl Game {
@@ -27,6 +28,7 @@ impl Game {
       dealer_hand: Hand::new(),
       status: GameStatus::Betting,
       balance: Balance::new(),
+      max_decks: 8,
     };
 
     game.balance.increase_bet();
@@ -65,7 +67,31 @@ impl Game {
   }
 
   pub fn player_increase_bet(&mut self) {
+    let GameStatus::Betting = self.status else {return};
+
     self.balance.increase_bet();
+  }
+
+  pub fn player_decrease_bet(&mut self) {
+    let GameStatus::Betting = self.status else {return};
+
+    self.balance.decrease_bet();
+  }
+
+  pub fn player_add_deck(&mut self) {
+    let GameStatus::Betting = self.status else {return};
+
+    if self.deck.get_decks_count() == self.max_decks {return};
+
+    self.deck.add_deck();
+  }
+
+  pub fn player_remove_deck(&mut self) {
+    let GameStatus::Betting = self.status else {return};
+
+    if self.deck.get_decks_count() == 1 {return};
+
+    self.deck.remove_deck();
   }
 
   fn dealer_play(&mut self) {
@@ -78,7 +104,8 @@ impl Game {
   }
 
   pub fn player_hit(&mut self) {
-    self.status = GameStatus::PlayerTurn;
+    let GameStatus::PlayerTurn = self.status else {return};
+
     if let Some(card) = self.deck.draw() {
       self.player_hand.push(card);
     }
@@ -91,6 +118,8 @@ impl Game {
   }
 
   pub fn player_stand(&mut self) {
+    let GameStatus::PlayerTurn = self.status else {return};
+
     self.status = GameStatus::DealerTurn;
     self.dealer_play();
   }

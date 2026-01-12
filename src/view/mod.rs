@@ -1,11 +1,11 @@
-use crossterm::event::{KeyCode, KeyEvent};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use ratatui::{
   Frame,
   layout::{HorizontalAlignment, Rect, VerticalAlignment},
   style::{Color, Style},
   text::{Line, Span, Text},
-  widgets::{Block, Paragraph, Wrap},
+  widgets::Block,
 };
 
 use crate::game::{Game, GameStatus};
@@ -121,36 +121,42 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
 }
 
 pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
-  match key.code {
-    KeyCode::Char('n') => {
-      game.reset();
-      Ok(())
-    }
-    KeyCode::Char('q') => Err(()),
-    KeyCode::Char('r') => {
+  match (key.modifiers, key.code) {
+    (KeyModifiers::CONTROL, KeyCode::Char('q')) => Err(()),
+    (KeyModifiers::CONTROL, KeyCode::Char('r')) => {
       game.reset_balance();
       Ok(())
     }
-    KeyCode::Char('b') => {
-      match &game.status {
-        GameStatus::Betting => game.player_increase_bet(),
-        _ => {},
-      };
+    (_, KeyCode::Char('n')) => {
+      game.reset();
       Ok(())
     }
-    KeyCode::Char('s') => {
+    (KeyModifiers::CONTROL, KeyCode::Char('d')) => {
+      game.player_remove_deck();
+      Ok(())
+    }
+    (_, KeyCode::Char('d')) => {
+      game.player_add_deck();
+      Ok(())
+    }
+    (KeyModifiers::CONTROL, KeyCode::Char('b')) => {
+      game.player_decrease_bet();
+      Ok(())
+    }
+    (_, KeyCode::Char('b')) => {
+      game.player_increase_bet();
+      Ok(())
+    }
+    (_, KeyCode::Char('s')) => {
       match &game.status {
         GameStatus::Betting => game.start(),
         GameStatus::PlayerTurn => game.player_stand(),
-        _ => {},
+        _ => {}
       };
       Ok(())
     }
-    KeyCode::Char('h') => {
-      match &game.status {
-        GameStatus::PlayerTurn => game.player_hit(),
-        _ => {},
-      }
+    (_, KeyCode::Char('h')) => {
+      game.player_hit();
       Ok(())
     }
     _ => Ok(()),

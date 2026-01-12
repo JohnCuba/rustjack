@@ -36,6 +36,15 @@ impl Balance {
     self.bet += 10;
   }
 
+  pub fn decrease_bet(&mut self) {
+    if self.bet == 10 {
+      return;
+    }
+
+    self.player = self.player + 5;
+    self.bet -= 10;
+  }
+
   pub fn player_take_bet(&mut self) {
     self.player += self.bet;
     self.bet = 0;

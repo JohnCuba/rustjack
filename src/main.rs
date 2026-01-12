@@ -1,5 +1,5 @@
-use std::io;
 use std::error::Error;
+use std::io;
 use std::time::Duration;
 
 use crossterm::{
@@ -8,27 +8,24 @@ use crossterm::{
   terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 
-use ratatui::{
-  Terminal,
-  backend::CrosstermBackend,
-};
+use ratatui::{Terminal, backend::CrosstermBackend};
 
 mod storage;
 
+mod balance;
 mod card;
 mod deck;
-mod hand;
 mod game;
-mod balance;
+mod hand;
 mod view;
 
-use crate::{game::Game};
+use crate::game::Game;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
   enable_raw_mode()?;
   let mut stdout = io::stdout();
-  execute!(stdout, EnterAlternateScreen)?;
+  execute!(stdout, EnterAlternateScreen,).unwrap();
   let backend = CrosstermBackend::new(stdout);
   let mut terminal = Terminal::new(backend)?;
 
