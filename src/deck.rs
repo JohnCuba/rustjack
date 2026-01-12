@@ -11,7 +11,19 @@ pub struct Deck {
 
 impl Deck {
   pub fn new() -> Self {
-    let mut cards = Vec::with_capacity(52);
+    let mut deck = Deck { cards: Vec::with_capacity(416) };
+
+    deck.add_deck();
+
+    return deck;
+  }
+
+  pub fn get_decks_count(&mut self) -> u16 {
+    let cards_count = self.cards.len() as u16;
+    return cards_count / 52;
+  }
+
+  pub fn add_deck(&mut self) {
     let suits = [
       CardSuit::Hearts,
       CardSuit::Diamonds,
@@ -36,11 +48,14 @@ impl Deck {
 
     for &suit in &suits {
       for &rank in &ranks {
-        cards.push(Card { suit, rank });
+        self.cards.push(Card { suit, rank });
       }
     }
+  }
 
-    Deck { cards }
+  pub fn remove_deck(&mut self) {
+    let cards_count = self.cards.len();
+    let _ = self.cards.split_off(cards_count - 52);
   }
 
   pub fn shuffle(&mut self) {

@@ -46,20 +46,8 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
       );
     }
   }
-  deck::render(frame);
 
-  let bet_text = format!("bet: {}$", game.balance.bet);
-  let bet_text_len = bet_text.len() as u16;
-
-  frame.render_widget(
-    Text::from(format!("bet: {}$", game.balance.bet)),
-    Rect {
-      x: frame.area().width / 2 - bet_text_len / 2,
-      y: frame.area().height / 2,
-      width: bet_text_len,
-      height: 1,
-    },
-  );
+  deck::render(frame, &game);
 
   let mut content = vec![
     Line::from(format!("{} $", game.balance.player)),
@@ -70,14 +58,13 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
     GameStatus::Betting => {
       content.push(Line::from("Betting"));
       content.push(Line::from(""));
-      content.push(Line::from("B - increase bet on 5$"));
-      content.push(Line::from("S - start game"));
+      content.push(Line::from("[s] start game"));
     }
     GameStatus::PlayerTurn => {
       content.push(Line::from("Your turn"));
       content.push(Line::from(""));
-      content.push(Line::from("H - hit"));
-      content.push(Line::from("S - stand"));
+      content.push(Line::from("[h] hit"));
+      content.push(Line::from("[s] stand"));
     }
     GameStatus::DealerTurn => {
       content.push(Line::from("Dealer turn"));
@@ -88,7 +75,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
         Style::default().fg(Color::Green),
       )));
       content.push(Line::from(""));
-      content.push(Line::from("N - new game"));
+      content.push(Line::from("[n] new game"));
     }
     GameStatus::DealerWon => {
       content.push(Line::from(Span::styled(
@@ -96,7 +83,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
         Style::default().fg(Color::Red),
       )));
       content.push(Line::from(""));
-      content.push(Line::from("N - new game"));
+      content.push(Line::from("[n] new game"));
     }
     GameStatus::Draw => {
       content.push(Line::from(Span::styled(
@@ -104,7 +91,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
         Style::default().fg(Color::Yellow),
       )));
       content.push(Line::from(""));
-      content.push(Line::from("N - new game"));
+      content.push(Line::from("[n] new game"));
     }
   }
 
@@ -123,7 +110,10 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
   frame.render_widget(
     Block::bordered()
       .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left))
-      .title_bottom(Line::from("Q - exit, R - reset balance").alignment(HorizontalAlignment::Left)),
+      .title_bottom(
+        Line::from("[^q] exit, [^r] reset")
+          .alignment(HorizontalAlignment::Left),
+      ),
     frame.area(),
   );
 }
