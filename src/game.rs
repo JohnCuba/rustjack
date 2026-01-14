@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::balance::Balance;
 use crate::deck::Deck;
 use crate::hand::Hand;
@@ -22,7 +24,7 @@ pub struct Game {
 
 impl Game {
   pub fn new() -> Self {
-    let mut game =  Self {
+    let mut game = Self {
       deck: Deck::new(),
       player_hand: Hand::new(),
       dealer_hand: Hand::new(),
@@ -67,29 +69,41 @@ impl Game {
   }
 
   pub fn player_increase_bet(&mut self) {
-    let GameStatus::Betting = self.status else {return};
+    let GameStatus::Betting = self.status else {
+      return;
+    };
 
     self.balance.increase_bet();
   }
 
   pub fn player_decrease_bet(&mut self) {
-    let GameStatus::Betting = self.status else {return};
+    let GameStatus::Betting = self.status else {
+      return;
+    };
 
     self.balance.decrease_bet();
   }
 
   pub fn player_add_deck(&mut self) {
-    let GameStatus::Betting = self.status else {return};
+    let GameStatus::Betting = self.status else {
+      return;
+    };
 
-    if self.deck.get_decks_count() == self.max_decks {return};
+    if self.deck.get_decks_count() == self.max_decks {
+      return;
+    };
 
     self.deck.add_deck();
   }
 
   pub fn player_remove_deck(&mut self) {
-    let GameStatus::Betting = self.status else {return};
+    let GameStatus::Betting = self.status else {
+      return;
+    };
 
-    if self.deck.get_decks_count() == 1 {return};
+    if self.deck.get_decks_count() == 1 {
+      return;
+    };
 
     self.deck.remove_deck();
   }
@@ -104,39 +118,71 @@ impl Game {
   }
 
   pub fn player_hit(&mut self) {
-    let GameStatus::PlayerTurn = self.status else {return};
+    let GameStatus::PlayerTurn = self.status else {
+      return;
+    };
 
     if let Some(card) = self.deck.draw() {
       self.player_hand.push(card);
     }
 
-    if self.player_hand.score() > 21 {
-      self.status = GameStatus::DealerWon;
-      self.balance.dealer_take_bet();
-      return;
+    if self.player_hand.score() >= 21 {
+      self.determine_winner();
     }
   }
 
   pub fn player_stand(&mut self) {
-    let GameStatus::PlayerTurn = self.status else {return};
+    let GameStatus::PlayerTurn = self.status else {
+      return;
+    };
 
     self.status = GameStatus::DealerTurn;
     self.dealer_play();
   }
 
-  fn determine_winner(&mut self) {
-    let p_score = self.player_hand.score();
-    let d_score = self.dealer_hand.score();
+  fn player_won(&mut self) {
+    self.status = GameStatus::PlayerWon;
+    self.balance.player_take_bet();
+  }
 
-    if d_score > 21 || p_score > d_score {
-      self.status = GameStatus::PlayerWon;
-      self.balance.player_take_bet();
-    } else if d_score > p_score {
-      self.status = GameStatus::DealerWon;
-      self.balance.dealer_take_bet();
-    } else {
-      self.status = GameStatus::Draw;
-      self.balance.divide_bet();
+  fn dealer_won(&mut self) {
+    self.status = GameStatus::DealerWon;
+    self.balance.dealer_take_bet();
+  }
+
+  fn draw(&mut self) {
+    self.status = GameStatus::Draw;
+    self.balance.divide_bet();
+  }
+
+  fn determine_winner(&mut self) {
+    let d_score = self.dealer_hand.score();
+    let p_score = self.player_hand.score();
+
+    if d_score > 21 {
+      return self.player_won();
+    } else if p_score > 21 {
+      return self.dealer_won();
+    }
+
+    if p_score == 21 && d_score == 21 {
+      if self.player_hand.cards.len() < self.dealer_hand.cards.len() {
+        return self.player_won();
+      } else {
+        return self.dealer_won();
+      }
+    }
+
+    match p_score.cmp(&d_score) {
+      Ordering::Greater => {
+        return self.player_won();
+      }
+      Ordering::Less => {
+        return self.dealer_won();
+      }
+      Ordering::Equal => {
+        return self.draw();
+      }
     }
   }
 }
