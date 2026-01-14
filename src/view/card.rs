@@ -64,42 +64,41 @@ pub fn build(card: &Card, options: BuildCardOptions) -> Paragraph<'static> {
 
   let mut content = vec![];
 
-  match options.hidden {
-    false => {
-      let content_color = match card.suit {
-        CardSuit::Hearts | CardSuit::Diamonds => Color::Red,
-        CardSuit::Spades | CardSuit::Clubs => Color::White,
-      };
-
+  if options.hidden {
+    let pattern = "▒░";
+    for index in 0..options.dimension.height - 1 {
       content.push(Line::from(Span::styled(
+        if index & 1 == 1 {
+          pattern.repeat(usize::from(options.dimension.width - 2))
+        } else {
+          pattern
+            .chars()
+            .rev()
+            .collect::<String>()
+            .repeat(usize::from(options.dimension.width - 2))
+        },
+        Style::default(),
+      )));
+    }
+  } else {
+    let content_color = match card.suit {
+      CardSuit::Hearts | CardSuit::Diamonds => Color::Red,
+      CardSuit::Spades | CardSuit::Clubs => Color::White,
+    };
+
+    content.extend(vec![
+      Line::from(Span::styled(
         card.rank_str(),
         Style::default().fg(content_color).bold(),
-      )));
-
-      content.push(Line::from(Span::styled(
+      )),
+      Line::from(Span::styled(
         card.suit_simbol(),
         Style::default().fg(content_color).bold(),
-      )));
+      )),
+    ]);
 
-      if options.aligment == VerticalAlignment::Top {
-        content.reverse();
-      }
-    }
-    true => {
-      let pattern = "▒░";
-      for index in 0..options.dimension.height - 1 {
-        content.push(Line::from(Span::styled(
-          match index & 1 == 1 {
-            true => pattern.repeat(usize::from(options.dimension.width - 2)),
-            false => pattern
-              .chars()
-              .rev()
-              .collect::<String>()
-              .repeat(usize::from(options.dimension.width - 2)),
-          },
-          Style::default(),
-        )));
-      }
+    if options.aligment == VerticalAlignment::Top {
+      content.reverse();
     }
   }
 

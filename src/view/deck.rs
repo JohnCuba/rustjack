@@ -49,12 +49,14 @@ fn render_help(frame: &mut Frame, game: &Game, x: u16, y: u16) {
 
   match &game.status {
     GameStatus::Betting => {
-      content.push(Line::from(format!(
-        "{} decks ({} cards)",
-        decks_count,
-        game.deck.cards.len()
-      )));
-      content.push(Line::from("[d] add / [^d] rem"));
+      content.extend(vec![
+        Line::from(format!(
+          "{} decks ({} cards)",
+          decks_count,
+          game.deck.cards.len()
+        )),
+        Line::from("[d] add / [^d] rem"),
+      ]);
     }
     _ => {}
   }

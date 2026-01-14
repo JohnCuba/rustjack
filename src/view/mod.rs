@@ -3,17 +3,17 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{
   Frame,
   layout::{HorizontalAlignment, VerticalAlignment},
-  text::{Line},
+  text::Line,
   widgets::Block,
 };
 
 use crate::game::{Game, GameStatus};
 
-mod constants;
-mod fallback;
 mod bet;
 mod card;
+mod constants;
 mod deck;
+mod fallback;
 mod hand;
 mod status;
 
@@ -52,15 +52,29 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
   bet::render(frame, &game);
   status::render(frame, &game);
 
-  frame.render_widget(
-    Block::bordered()
-      .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left))
-      .title_bottom(
-        Line::from("[^q] exit, [^r] reset")
-          .alignment(HorizontalAlignment::Left),
-      ),
-    frame.area(),
-  );
+  let mut game_frame = Block::bordered()
+    .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left))
+    .title_bottom(Line::from("[^q] exit, [^r] reset").alignment(HorizontalAlignment::Left));
+
+  match game.status {
+    GameStatus::Betting => {}
+    _ => {
+      game_frame = game_frame.title_bottom(
+        Line::from(game.player_hand.score().to_string()).alignment(HorizontalAlignment::Center),
+      );  
+    }
+  }
+
+  match game.status {
+    GameStatus::DealerWon | GameStatus::PlayerWon | GameStatus::Draw => {
+      game_frame = game_frame.title_top(
+        Line::from(game.dealer_hand.score().to_string()).alignment(HorizontalAlignment::Center),
+      );
+    }
+    _ => {}
+  }
+
+  frame.render_widget(game_frame, frame.area());
 }
 
 pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
