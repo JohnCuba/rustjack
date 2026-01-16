@@ -13,7 +13,7 @@ pub fn render(frame: &mut Frame, game: &Game) {
   let mut content = vec![Line::from(format!("bet: {}$", game.balance.bet))];
 
   if let GameStatus::Betting = &game.status {
-    content.push(Line::from("[b]/[^b] inc/dec bet on 5$"));
+    content.push(Line::from("⬆/⬇ bet on 5$"));
   }
 
   let dim = Dimension {

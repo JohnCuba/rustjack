@@ -16,12 +16,12 @@ pub fn render(frame: &mut Frame, game: &Game) {
   let status_lines: Vec<Line> = match &game.status {
     GameStatus::Betting => vec![
       Line::from("Betting"),
-      Line::from("[s] start game"),
+      Line::from("[enter] start game"),
     ],
     GameStatus::PlayerTurn => vec![
       Line::from("Your turn"),
-      Line::from("[h] hit"),
-      Line::from("[s] stand"),
+      Line::from("[⮕] hit"),
+      Line::from("[⬅] stand"),
     ],
     GameStatus::DealerTurn => vec![
       Line::from("Dealer turn"),

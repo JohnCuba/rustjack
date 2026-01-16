@@ -54,7 +54,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
 
   let mut game_frame = Block::bordered()
     .title_top(Line::from(" RustJack ").alignment(HorizontalAlignment::Left))
-    .title_bottom(Line::from("[^q] exit, [^r] reset").alignment(HorizontalAlignment::Left));
+    .title_bottom(Line::from("[^c] exit, [^r] reset").alignment(HorizontalAlignment::Left));
 
   match game.status {
     GameStatus::Betting => {}
@@ -79,7 +79,7 @@ pub fn render_game(frame: &mut Frame, game: &Game) {
 
 pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
   match (key.modifiers, key.code) {
-    (KeyModifiers::CONTROL, KeyCode::Char('q')) => Err(()),
+    (KeyModifiers::CONTROL, KeyCode::Char('c')) => Err(()),
     (KeyModifiers::CONTROL, KeyCode::Char('r')) => {
       game.reset_balance();
       Ok(())
@@ -88,31 +88,31 @@ pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
       game.reset();
       Ok(())
     }
-    (KeyModifiers::CONTROL, KeyCode::Char('d')) => {
+    (_, KeyCode::Char('-')) => {
       game.player_remove_deck();
       Ok(())
     }
-    (_, KeyCode::Char('d')) => {
+    (_, KeyCode::Char('=')) => {
       game.player_add_deck();
       Ok(())
     }
-    (KeyModifiers::CONTROL, KeyCode::Char('b')) => {
+    (_, KeyCode::Down) => {
       game.player_decrease_bet();
       Ok(())
     }
-    (_, KeyCode::Char('b')) => {
+    (_, KeyCode::Up) => {
       game.player_increase_bet();
       Ok(())
     }
-    (_, KeyCode::Char('s')) => {
-      match &game.status {
-        GameStatus::Betting => game.start(),
-        GameStatus::PlayerTurn => game.player_stand(),
-        _ => {}
-      };
+    (_, KeyCode::Enter) => {
+      game.start();
       Ok(())
     }
-    (_, KeyCode::Char('h')) => {
+    (_, KeyCode::Left) => {
+      game.player_stand();
+      Ok(())
+    }
+    (_, KeyCode::Right) => {
       game.player_hit();
       Ok(())
     }

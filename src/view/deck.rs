@@ -55,7 +55,7 @@ fn render_help(frame: &mut Frame, game: &Game, x: u16, y: u16) {
           decks_count,
           game.deck.cards.len()
         )),
-        Line::from("[d] add / [^d] rem"),
+        Line::from("+ / -"),
       ]);
     }
     _ => {}
