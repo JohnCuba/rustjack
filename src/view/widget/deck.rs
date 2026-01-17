@@ -8,7 +8,7 @@ use ratatui::{
 use crate::card::{Card, CardRank, CardSuit};
 use crate::{
   game::{Game, GameStatus},
-  view::card,
+  view::widget::card,
 };
 
 pub fn render(frame: &mut Frame, game: &Game) {

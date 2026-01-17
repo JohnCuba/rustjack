@@ -31,21 +31,21 @@ pub fn render(frame: &mut Frame, game: &Game) {
         "You won!",
         Style::default().fg(Color::Green).bold(),
       )),
-      Line::from("[n] new game"),
+      Line::from("[enter] new game"),
     ],
     GameStatus::DealerWon => vec![
       Line::from(Span::styled(
         "Dealer won!",
         Style::default().fg(Color::Red).bold(),
       )),
-      Line::from("[n] new game"),
+      Line::from("[enter] new game"),
     ],
     GameStatus::Draw => vec![
       Line::from(Span::styled(
         "Draw!",
         Style::default().fg(Color::Yellow).bold(),
       )),
-      Line::from("[n] new game"),
+      Line::from("[enter] new game"),
     ],
   };
   content.extend(status_lines);

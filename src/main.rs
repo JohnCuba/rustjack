@@ -36,9 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {
-        let res = view::handle_key_event(key, &mut game);
-
-        match res {
+        match view::handle_key_event(key, &mut game) {
           Ok(()) => continue,
           Err(()) => break,
         }

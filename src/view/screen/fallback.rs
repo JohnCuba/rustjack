@@ -10,7 +10,7 @@ pub fn check_view_port(frame: &mut Frame) -> bool {
   return frame.area().width < MIN_VIEW.width || frame.area().height < MIN_VIEW.height;
 }
 
-pub fn render_fallback(frame: &mut Frame) {
+pub fn render(frame: &mut Frame) {
   let content = format!(
     "Terminal window must be at least {}x{}, now {}x{}",
     MIN_VIEW.width,
