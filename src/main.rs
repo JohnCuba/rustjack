@@ -1,10 +1,7 @@
-use std::{error::Error, time::Duration};
-use crossterm::{
-  event::{self, Event},
-};
+use std::error::Error;
 
-mod tui_app;
 mod storage;
+mod tui_app;
 
 mod balance;
 mod card;
@@ -15,24 +12,14 @@ mod view;
 
 use crate::{game::Game, tui_app::engine::Engine};
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
   let mut engine = Engine::init()?;
   let mut game = Game::new();
 
-  loop {
-    engine.instance.draw(|frame| view::render_game(frame, &game))?;
+  let result = tui_app::app::run(&mut engine.instance, &mut game);
 
-    if event::poll(Duration::from_millis(16))? {
-      if let Event::Key(key) = event::read()? {
-        match view::handle_key_event(key, &mut game) {
-          Ok(()) => continue,
-          Err(()) => break,
-        }
-      }
-    }
-
-    tokio::task::yield_now().await;
+  if let Err(err) = result {
+    println!("application error: {err}");
   }
 
   Ok(())
