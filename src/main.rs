@@ -9,13 +9,12 @@ mod deck;
 mod game;
 mod hand;
 
-use crate::{game::Game, tui_app::engine::Engine};
+use crate::game::Game;
 
 fn main() -> Result<(), Box<dyn Error>> {
-  let mut engine = Engine::init()?;
   let mut game = Game::new();
 
-  let result = tui_app::app::run(&mut engine.instance, &mut game);
+  let result = tui_app::app::run(&mut game);
 
   if let Err(err) = result {
     println!("application error: {err}");

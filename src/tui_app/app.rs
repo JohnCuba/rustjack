@@ -1,17 +1,18 @@
 use std::{
-  io::{Result, Stdout},
+  io::Result,
   time::Duration,
 };
 
 use crossterm::event::{self, Event};
-use ratatui::{Terminal, prelude::CrosstermBackend};
 
 use crate::game::Game;
-use super::view;
+use super::{view, engine::Engine};
 
-pub fn run(terminal: &mut Terminal<CrosstermBackend<Stdout>>, game: &mut Game) -> Result<()> {
+pub fn run(game: &mut Game) -> Result<()> {
+  let mut engine = Engine::init()?;
+
   loop {
-    terminal.draw(|frame| view::render_game(frame, game))?;
+    engine.instance.draw(|frame| view::render_game(frame, game))?;
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {
