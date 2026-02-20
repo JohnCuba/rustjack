@@ -1,6 +1,6 @@
 use crate::{
   game::{Game, GameStatus},
-  view::constants::Dimension,
+  tui_app::view::constants::Dimension,
 };
 use ratatui::{
   Frame,

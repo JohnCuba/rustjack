@@ -6,7 +6,8 @@ use std::{
 use crossterm::event::{self, Event};
 use ratatui::{Terminal, prelude::CrosstermBackend};
 
-use crate::{game::Game, view};
+use crate::game::Game;
+use super::view;
 
 pub fn run(terminal: &mut Terminal<CrosstermBackend<Stdout>>, game: &mut Game) -> Result<()> {
   loop {

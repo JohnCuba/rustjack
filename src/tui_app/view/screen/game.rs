@@ -8,7 +8,7 @@ use ratatui::{
 };
 
 use crate::game::{Game, GameStatus};
-use crate::view::widget::{bet, hand, deck, status};
+use crate::tui_app::view::widget::{bet, hand, deck, status};
 
 pub fn render(frame: &mut Frame, game: &Game) {
   match &game.status {

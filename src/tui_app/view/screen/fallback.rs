@@ -4,7 +4,7 @@ use ratatui::{
   widgets::{Paragraph, Wrap},
 };
 
-use crate::view::constants::{MIN_VIEW};
+use crate::tui_app::view::constants::MIN_VIEW;
 
 pub fn check_view_port(frame: &mut Frame) -> bool {
   return frame.area().width < MIN_VIEW.width || frame.area().height < MIN_VIEW.height;

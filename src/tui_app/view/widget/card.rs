@@ -8,7 +8,7 @@ use ratatui::{
 
 use crate::{
   card::{Card, CardSuit},
-  view::constants::Dimension,
+  tui_app::view::constants::Dimension,
 };
 
 pub fn calc_dim(frame: &mut Frame) -> Dimension {

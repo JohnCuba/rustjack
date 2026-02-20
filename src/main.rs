@@ -8,7 +8,6 @@ mod card;
 mod deck;
 mod game;
 mod hand;
-mod view;
 
 use crate::{game::Game, tui_app::engine::Engine};
 

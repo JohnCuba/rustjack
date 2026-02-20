@@ -1,14 +1,14 @@
 use crossterm::event::KeyEvent;
 
-use ratatui::Frame;
 use crate::game::Game;
+use ratatui::Frame;
 
 mod constants;
-mod widget;
 mod screen;
+mod widget;
 
 pub fn render_game(frame: &mut Frame, game: &Game) {
-	if screen::fallback::check_view_port(frame) {
+  if screen::fallback::check_view_port(frame) {
     screen::fallback::render(frame);
     return;
   }

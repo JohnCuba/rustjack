@@ -6,10 +6,8 @@ use ratatui::{
 };
 
 use crate::card::{Card, CardRank, CardSuit};
-use crate::{
-  game::{Game, GameStatus},
-  view::widget::card,
-};
+use crate::game::{Game, GameStatus};
+use super::card;
 
 pub fn render(frame: &mut Frame, game: &Game) {
   let card_dim = card::calc_dim(frame);
