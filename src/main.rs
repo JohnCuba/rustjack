@@ -1,15 +1,9 @@
-use std::error::Error;
-use std::io;
-use std::time::Duration;
-
+use std::{error::Error, time::Duration};
 use crossterm::{
   event::{self, Event},
-  execute,
-  terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 
-use ratatui::{Terminal, backend::CrosstermBackend};
-
+mod tui_app;
 mod storage;
 
 mod balance;
@@ -19,20 +13,15 @@ mod game;
 mod hand;
 mod view;
 
-use crate::game::Game;
+use crate::{game::Game, tui_app::engine::Engine};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-  enable_raw_mode()?;
-  let mut stdout = io::stdout();
-  execute!(stdout, EnterAlternateScreen,).unwrap();
-  let backend = CrosstermBackend::new(stdout);
-  let mut terminal = Terminal::new(backend)?;
-
+  let mut engine = Engine::init()?;
   let mut game = Game::new();
 
   loop {
-    terminal.draw(|frame| view::render_game(frame, &game))?;
+    engine.instance.draw(|frame| view::render_game(frame, &game))?;
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {
@@ -46,8 +35,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::task::yield_now().await;
   }
 
-  disable_raw_mode()?;
-  execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-  terminal.show_cursor()?;
   Ok(())
 }
