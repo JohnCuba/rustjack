@@ -1,9 +1,9 @@
-use std::{io::Result, time::Duration};
+use std::io::Result;
 
 use crossterm::event::{self, Event};
 
-use super::{engine::Engine, view};
-use crate::core::game::Game;
+use super::{engine::Engine, view, constants::POOL_TIMEOUT};
+use crate::{core::game::Game, tui_app::constants::InputResult};
 
 pub fn run(game: &mut Game) -> Result<()> {
   let mut engine = Engine::init()?;
@@ -11,17 +11,15 @@ pub fn run(game: &mut Game) -> Result<()> {
   loop {
     engine
       .instance
-      .draw(|frame| view::render_game(frame, game))?;
+      .draw(|frame| view::render_game(frame, &game))?;
 
-    if event::poll(Duration::from_millis(16))? {
+    if event::poll(POOL_TIMEOUT)? {
       if let Event::Key(key) = event::read()? {
         match view::handle_key_event(key, game) {
-          Ok(()) => continue,
-          Err(()) => break,
+          InputResult::Continue => continue,
+          InputResult::Exit => return Ok(()),
         }
       }
     }
   }
-
-  Ok(())
 }

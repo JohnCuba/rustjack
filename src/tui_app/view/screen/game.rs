@@ -7,7 +7,7 @@ use ratatui::{
   widgets::Block,
 };
 
-use crate::core::game::{Game, GameStatus};
+use crate::{core::game::{Game, GameStatus}, tui_app::constants::InputResult};
 use crate::tui_app::view::widget::{bet, deck, hand, status};
 
 pub fn render(frame: &mut Frame, game: &Game) {
@@ -65,28 +65,27 @@ pub fn render(frame: &mut Frame, game: &Game) {
   frame.render_widget(game_frame, frame.area());
 }
 
-pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
+pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> InputResult {
   match (key.modifiers, key.code) {
-    (KeyModifiers::CONTROL, KeyCode::Char('c')) => Err(()),
     (KeyModifiers::CONTROL, KeyCode::Char('r')) => {
       game.reset_balance();
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Char('-')) => {
       game.player_remove_deck();
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Char('=')) => {
       game.player_add_deck();
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Down) => {
       game.player_decrease_bet();
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Up) => {
       game.player_increase_bet();
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Enter) => {
       match &game.status {
@@ -94,16 +93,16 @@ pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
         _ => game.reset(),
       }
 
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Left) => {
       game.player_stand();
-      Ok(())
+      InputResult::Continue
     }
     (_, KeyCode::Right) => {
       game.player_hit();
-      Ok(())
+      InputResult::Continue
     }
-    _ => Ok(()),
+    _ => InputResult::Continue,
   }
 }
