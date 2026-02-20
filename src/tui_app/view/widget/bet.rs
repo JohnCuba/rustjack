@@ -1,5 +1,5 @@
 use crate::{
-  game::{Game, GameStatus},
+  core::game::{Game, GameStatus},
   tui_app::view::constants::Dimension,
 };
 use ratatui::{

@@ -1,8 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::balance::Balance;
-use crate::deck::Deck;
-use crate::hand::Hand;
+use super::{balance::Balance, deck::Deck, hand::Hand};
 
 pub enum GameStatus {
   Betting,

@@ -1,15 +1,9 @@
 use std::error::Error;
 
-mod storage;
+mod core;
 mod tui_app;
 
-mod balance;
-mod card;
-mod deck;
-mod game;
-mod hand;
-
-use crate::game::Game;
+use core::game::Game;
 
 fn main() -> Result<(), Box<dyn Error>> {
   let mut game = Game::new();

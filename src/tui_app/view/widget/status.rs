@@ -5,7 +5,7 @@ use ratatui::{
   text::{Line, Span, Text},
 };
 
-use crate::game::{Game, GameStatus};
+use crate::core::game::{Game, GameStatus};
 
 pub fn render(frame: &mut Frame, game: &Game) {
   let mut content = vec![
@@ -14,18 +14,13 @@ pub fn render(frame: &mut Frame, game: &Game) {
   ];
 
   let status_lines: Vec<Line> = match &game.status {
-    GameStatus::Betting => vec![
-      Line::from("Betting"),
-      Line::from("[enter] start game"),
-    ],
+    GameStatus::Betting => vec![Line::from("Betting"), Line::from("[enter] start game")],
     GameStatus::PlayerTurn => vec![
       Line::from("Your turn"),
       Line::from("[⮕] hit"),
       Line::from("[⬅] stand"),
     ],
-    GameStatus::DealerTurn => vec![
-      Line::from("Dealer turn"),
-    ],
+    GameStatus::DealerTurn => vec![Line::from("Dealer turn")],
     GameStatus::PlayerWon => vec![
       Line::from(Span::styled(
         "You won!",
@@ -59,11 +54,7 @@ pub fn render(frame: &mut Frame, game: &Game) {
   ])
   .split(frame.area());
 
-  let area = Layout::horizontal([
-      Constraint::Length(2),
-      Constraint::Min(0),
-  ])
-  .split(vertical[1]);
+  let area = Layout::horizontal([Constraint::Length(2), Constraint::Min(0)]).split(vertical[1]);
 
   frame.render_widget(Text::from(content), area[1]);
 }

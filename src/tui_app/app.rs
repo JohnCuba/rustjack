@@ -1,18 +1,17 @@
-use std::{
-  io::Result,
-  time::Duration,
-};
+use std::{io::Result, time::Duration};
 
 use crossterm::event::{self, Event};
 
-use crate::game::Game;
-use super::{view, engine::Engine};
+use super::{engine::Engine, view};
+use crate::core::game::Game;
 
 pub fn run(game: &mut Game) -> Result<()> {
   let mut engine = Engine::init()?;
 
   loop {
-    engine.instance.draw(|frame| view::render_game(frame, game))?;
+    engine
+      .instance
+      .draw(|frame| view::render_game(frame, game))?;
 
     if event::poll(Duration::from_millis(16))? {
       if let Event::Key(key) = event::read()? {

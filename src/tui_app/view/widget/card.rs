@@ -7,7 +7,7 @@ use ratatui::{
 };
 
 use crate::{
-  card::{Card, CardSuit},
+  core::card::{Card, CardSuit},
   tui_app::view::constants::Dimension,
 };
 

@@ -3,7 +3,8 @@ use ratatui::{
   layout::{Rect, VerticalAlignment},
 };
 
-use crate::hand::Hand;
+use crate::core::hand::Hand;
+
 use super::card;
 
 pub struct RenderHandOptions<'a> {

@@ -7,8 +7,8 @@ use ratatui::{
   widgets::Block,
 };
 
-use crate::game::{Game, GameStatus};
-use crate::tui_app::view::widget::{bet, hand, deck, status};
+use crate::core::game::{Game, GameStatus};
+use crate::tui_app::view::widget::{bet, deck, hand, status};
 
 pub fn render(frame: &mut Frame, game: &Game) {
   match &game.status {
@@ -49,7 +49,7 @@ pub fn render(frame: &mut Frame, game: &Game) {
     _ => {
       game_frame = game_frame.title_bottom(
         Line::from(game.player_hand.score().to_string()).alignment(HorizontalAlignment::Center),
-      );  
+      );
     }
   }
 
@@ -93,7 +93,7 @@ pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> Result<(), ()> {
         GameStatus::Betting => game.start(),
         _ => game.reset(),
       }
-      
+
       Ok(())
     }
     (_, KeyCode::Left) => {

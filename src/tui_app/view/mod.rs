@@ -1,7 +1,8 @@
 use crossterm::event::KeyEvent;
 
-use crate::game::Game;
 use ratatui::Frame;
+
+use crate::core::game::Game;
 
 mod constants;
 mod screen;

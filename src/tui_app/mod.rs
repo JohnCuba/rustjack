@@ -1,3 +1,3 @@
-mod view;
-pub mod engine;
 pub mod app;
+pub mod engine;
+mod view;

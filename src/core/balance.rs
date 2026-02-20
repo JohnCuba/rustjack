@@ -1,4 +1,4 @@
-use crate::storage::{Storage};
+use super::storage::Storage;
 
 pub struct Balance {
   pub player: u32,

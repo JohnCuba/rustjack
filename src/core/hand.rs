@@ -1,4 +1,4 @@
-use crate::card::{Card, CardRank};
+use super::card::{Card, CardRank};
 
 pub struct Hand {
   pub cards: Vec<Card>,

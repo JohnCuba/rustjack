@@ -1,9 +1,7 @@
 use rand::rng;
 use rand::seq::SliceRandom;
 
-use crate::card::Card;
-use crate::card::CardRank;
-use crate::card::CardSuit;
+use super::card::{Card, CardRank, CardSuit};
 
 pub struct Deck {
   pub cards: Vec<Card>,
@@ -11,7 +9,9 @@ pub struct Deck {
 
 impl Deck {
   pub fn new() -> Self {
-    let mut deck = Deck { cards: Vec::with_capacity(416) };
+    let mut deck = Deck {
+      cards: Vec::with_capacity(416),
+    };
 
     deck.add_deck();
 

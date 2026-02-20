@@ -5,9 +5,11 @@ use ratatui::{
   widgets::{Paragraph, Wrap},
 };
 
-use crate::card::{Card, CardRank, CardSuit};
-use crate::game::{Game, GameStatus};
 use super::card;
+use crate::core::{
+  card::{Card, CardRank, CardSuit},
+  game::{Game, GameStatus},
+};
 
 pub fn render(frame: &mut Frame, game: &Game) {
   let card_dim = card::calc_dim(frame);
