@@ -1,5 +1,6 @@
 mod constants;
 
-pub mod app;
-pub mod engine;
+mod engine;
 mod view;
+
+pub mod app;

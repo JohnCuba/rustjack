@@ -65,7 +65,7 @@ pub fn render(frame: &mut Frame, game: &Game) {
   frame.render_widget(game_frame, frame.area());
 }
 
-pub fn handle_key_event<'a>(key: KeyEvent, game: &mut Game) -> InputResult {
+pub fn handle_key_event(key: KeyEvent, game: &mut Game) -> InputResult {
   match (key.modifiers, key.code) {
     (KeyModifiers::CONTROL, KeyCode::Char('r')) => {
       game.reset_balance();

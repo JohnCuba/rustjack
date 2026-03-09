@@ -15,7 +15,7 @@ impl Engine {
   pub fn init() -> io::Result<Self> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen,).unwrap();
+    execute!(stdout, EnterAlternateScreen).unwrap();
     let backend = CrosstermBackend::new(stdout);
     let terminal = Terminal::new(backend)?;
 

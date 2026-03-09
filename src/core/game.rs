@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 
 use super::{balance::Balance, deck::Deck, hand::Hand};
 
+#[derive(PartialEq)]
 pub enum GameStatus {
   Betting,
   PlayerTurn,
@@ -67,7 +68,7 @@ impl Game {
   }
 
   pub fn player_increase_bet(&mut self) {
-    let GameStatus::Betting = self.status else {
+    if GameStatus::Betting != self.status {
       return;
     };
 
@@ -75,7 +76,7 @@ impl Game {
   }
 
   pub fn player_decrease_bet(&mut self) {
-    let GameStatus::Betting = self.status else {
+    if GameStatus::Betting != self.status {
       return;
     };
 
@@ -83,7 +84,7 @@ impl Game {
   }
 
   pub fn player_add_deck(&mut self) {
-    let GameStatus::Betting = self.status else {
+    if GameStatus::Betting != self.status {
       return;
     };
 
@@ -95,7 +96,7 @@ impl Game {
   }
 
   pub fn player_remove_deck(&mut self) {
-    let GameStatus::Betting = self.status else {
+    if GameStatus::Betting != self.status {
       return;
     };
 
@@ -116,7 +117,7 @@ impl Game {
   }
 
   pub fn player_hit(&mut self) {
-    let GameStatus::PlayerTurn = self.status else {
+    if GameStatus::PlayerTurn != self.status {
       return;
     };
 
@@ -130,7 +131,7 @@ impl Game {
   }
 
   pub fn player_stand(&mut self) {
-    let GameStatus::PlayerTurn = self.status else {
+    if GameStatus::PlayerTurn != self.status {
       return;
     };
 
